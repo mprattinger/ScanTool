@@ -1,0 +1,20 @@
+import {Gpio} from "onoff";
+
+let led = new Gpio(23, "out");
+let btn = new Gpio(18, "in", "rising", { debounceTimeout: 10});
+led.writeSync(0);
+
+let state = false;
+
+btn.watch(async (err, val) => {
+    state = !state
+    console.log(`BTN: ${val} => State: ${state}`);
+
+    await led.write(state ? 1 : 0);
+})
+
+process.on('SIGINT', _ => {
+    console.log("Killing the gpios")
+    led.unexport();
+    btn.unexport();
+});
